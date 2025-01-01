@@ -24,6 +24,13 @@ export default function App(){
   const [oldFriend,setOldFriend]=useState(initialFriends)
   const [selectedFriend,setSelectedFriend]=useState(null);
   const [showAddFriend,setShowAddFriend]=useState(false);
+ 
+  function handleSplitBill(value){
+    // console.log(value);
+    setOldFriend(fri=>fri.map(fr=>fr.id===selectedFriend?.id?{...fr,balance:fr.balance+value}:fr))
+    setSelectedFriend(null)
+    
+  }
 
   // console.log(oldFriend);
   function handleSelectedFriend(friend){
@@ -48,7 +55,7 @@ export default function App(){
     {showAddFriend&&<FormAddFriend onNewFriend={handNewFriend}/>}
     <Button onClick={handShowAddFriend}>{showAddFriend?'close':'Add Friend'}</Button>
     </div>
-    {selectedFriend &&<FormSplitBill selectedFriend={selectedFriend}/>}
+    {selectedFriend &&<FormSplitBill selectedFriend={selectedFriend} onSplitBill={handleSplitBill}/>}
   
   </div>
 }
@@ -108,13 +115,19 @@ setImage('https://i.pravatar.cc/48?u=')
   </form>
 }
 
-function FormSplitBill({selectedFriend}){
+function FormSplitBill({selectedFriend,onSplitBill}){
   const [bill,setBill]=useState('');
   const [paidByUser,setPaidByUser]=useState('');
-  const [whoisPaying,setWhoisPaying]=useState('User')
+  const [whoisPaying,setWhoisPaying]=useState('user')
   const paidbyFriend=bill?bill-paidByUser:'';
-  
-  return <form className='form-split-bill'>
+  function handleSplitForm(e){
+    e.preventDefault()
+    if(!bill || !paidByUser) return
+     onSplitBill(whoisPaying==='user'?paidbyFriend:-paidByUser)
+  }
+
+ 
+  return <form className='form-split-bill' onSubmit={handleSplitForm}>
     <h2>Split a bill with {selectedFriend.name}</h2>
     <label>💰Bill value</label>
     <input type='text' value={bill} onChange={(e)=>(setBill(1*e.target.value))}/>
@@ -129,6 +142,6 @@ function FormSplitBill({selectedFriend}){
       <option value='user'>You</option>
       <option value='friend'>{selectedFriend.name}'s</option>
     </select>
-    <Button>Split Bill</Button>
+    <Button >Split Bill</Button>
   </form>
 }
